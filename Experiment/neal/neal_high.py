@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+"""
+@author: Yu Wang
+"""
 from proposal import *
 
 from utils import sample_size
 from viabel import vi_diagnostics, bbvi
+#from viabel.approximations import NVPFlow
+from viabel.approximations import MFStudentT
 import autograd.scipy.stats.norm as norm
 import autograd.numpy as np
 import matplotlib.pyplot as plt
@@ -14,7 +18,6 @@ from utils import (mean_diff_ci,
                    maximum_r_square, 
                    maximum_r_square_path)
 from parallel_mh import parallel_hmc, parallel_mh
-import seaborn as sns
 
 
 def plot_bound_dim_neal(x, dim, figure_size =(12, 10), 
@@ -119,7 +122,7 @@ def plot_bound_dim_neal(x, dim, figure_size =(12, 10),
     axs[1,1].axhline(y=0.7, linestyle= '--', color ='grey')
     fig.savefig('neal_high_new.pdf', bbox_inches='tight')
     
-plot_bound_dim_neal(high_neal_simulation, dimension_list, figure_size =(22, 12), 
+plot_bound_dim_neal(high_neal_simulation, np.arange(30)+2, figure_size =(22, 12), 
                    font_scale = 1.5,
                    fontsize_label=28, 
                    fontsize_legend=16,
@@ -219,7 +222,8 @@ def high_dim_neal(dimen_list, sigma=1, n_iteration = 50,
         n_steps = int(n_iteration*D**(1/3))
         
         ### fit with mfvb
-        results=bbvi(D, log_density=log_density_neal_mfvb, learning_rate=0.1)
+        results=bbvi(D, log_density=log_density_neal_mfvb, approx=NVPFlow,
+                     learning_rate=0.1)
     
         ### draw samples from approximating distribution
         diagnostics = vi_diagnostics(results['opt_param'], 
@@ -232,6 +236,12 @@ def high_dim_neal(dimen_list, sigma=1, n_iteration = 50,
         var_diff_1.append(np.abs(np.log(true_std[0]**2/np.exp(2*results['opt_param'][D]))))
         var_diff_2.append(np.abs(np.log(true_std[1]**2/np.exp(2*results['opt_param'][1+D]))))
         
+        ### ground truth quantile bounds
+        mean_diff_1 .append(np.abs(results['opt_param'][0]))
+        mean_diff_2 .append(np.abs(results['opt_param'][1]))
+        var_diff_1.append(np.abs(np.log(true_std[0]**2/np.exp(2*results['opt_param'][D]))))
+        var_diff_2.append(np.abs(np.log(true_std[1]**2/np.exp(2*results['opt_param'][1+D]))))        
+        
         ###### Define proposal distribution based on log_density(and grad_log_density)
     
         #phmc = proposal_hmc(dimension = D, logdensity = log_density_neal_mfvb, 
@@ -242,7 +252,7 @@ def high_dim_neal(dimen_list, sigma=1, n_iteration = 50,
         #                            proposal_param=np.log(0.01), 
         #                            target_rate=phmc.target_rate, 
         #                            M=phmc.M)[0][:,:, n_steps]
-        pbarker = proposal_barker(dimension = D, logdensity = log_density_neal_mfvb, 
+        pbarker = proposal_mala(dimension = D, logdensity = log_density_neal_mfvb, 
                               grad_logdensity = grad_neal, 
                               pre_condition=True)
 
@@ -318,17 +328,13 @@ def high_dim_neal(dimen_list, sigma=1, n_iteration = 50,
                 )
   
 if __name__ == '__main__':      
-    dimension_list = 2**(np.arange(28)+1)
-    high_neal_simulation = high_dim_neal(dimension_list)
-    plot_bound_dim_neal(high_neal_simulation, dimension_list, 
+    high_neal_simulation_gaussian = high_dim_neal(np.arange(28)+2)
+    plot_bound_dim_neal(high_neal_simulation, np.arange(28)+2, 
                    font_scale = 1.5,fontsize_label=21, fontsize_legend=12.5)
     r_square_trace_high_neal(high_neal_simulation['r_2_path'],figure_size =(6, 2), 
                         fontsize_label=13, fontsize_tick=12,
                         fontsize_legend=12)  
     
-    
-    
-
     
     
     

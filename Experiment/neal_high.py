@@ -328,8 +328,8 @@ def high_dim_neal(dimen_list, sigma=1, n_iteration = 50,
                 )
   
 if __name__ == '__main__':      
-    high_neal_simulation_gaussian = high_dim_neal(np.arange(10)+2)
-    plot_bound_dim_neal(high_neal_simulation, np.arange(30)+2, 
+    high_neal_simulation_gaussian = high_dim_neal(np.arange(28)+2)
+    plot_bound_dim_neal(high_neal_simulation, np.arange(28)+2, 
                    font_scale = 1.5,fontsize_label=21, fontsize_legend=12.5)
     r_square_trace_high_neal(high_neal_simulation['r_2_path'],figure_size =(6, 2), 
                         fontsize_label=13, fontsize_tick=12,

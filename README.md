@@ -10,8 +10,8 @@ Code to reproduce experiments from "A Targeted Accuracy Diagnostic for Variation
 - Experiments:<br>
     - Gaussian - correlated Gaussian model.
     - Neal - Neal-funnel shape model.
+    - Cancer-calssification - Sparse logistic regression on cancer classification dataset.
     - Candy-power 
         - Logistic regression on candy-power dataset.
         - Bayesian Neural Network on candy-power dataset.
-    -Cancer-calssification - Sparse logistic regression on cancer classification dataset.
 
